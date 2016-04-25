@@ -36,6 +36,7 @@ let BrowserToolbar = ({
   onDeleteRows,
   onDropClass,
   onChangeCLP,
+  onRefresh,
   hidePerms,
 
   enableDeleteAllRows,
@@ -44,14 +45,15 @@ let BrowserToolbar = ({
 }) => {
   let selectionLength = Object.keys(selection).length;
   let details = [];
-  if (!relation) {
-    if (count !== undefined) {
+  if (count !== undefined) {
       if (count === 1) {
         details.push('1 object');
       } else {
         details.push(prettyNumber(count) + ' objects');
       }
-    }
+  }
+
+  if (!relation) {    
     if (perms && !hidePerms) {
       let read = perms.get && perms.find && perms.get['*'] && perms.find['*'];
       let write = perms.create && perms.update && perms.delete && perms.create['*'] && perms.update['*'] && perms.delete['*'];
@@ -104,7 +106,13 @@ let BrowserToolbar = ({
     <Toolbar
       section={relation ? `Relation <${relation.targetClassName}>` : 'Class'}
       subsection={subsection}
-      details={details.join(' \u2022 ')}>
+      details={details.join(' \u2022 ')}
+    >
+      <a className={styles.toolbarButton} onClick={onRefresh}>
+        <Icon name='refresh-solid' width={14} height={14} />
+        <span>Refresh</span>
+      </a>
+      <div className={styles.toolbarSeparator} />
       <BrowserFilter
         setCurrent={setCurrent}
         schema={schema}

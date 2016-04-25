@@ -37,6 +37,8 @@ export default class ParseApp {
     apiKey,
     serverURL,
     serverInfo,
+    production,
+    iconName,
     ...params,
   }) {
     this.name = appName;
@@ -54,9 +56,10 @@ export default class ParseApp {
     this.windowsKey = windowsKey;
     this.webhookKey = webhookKey;
     this.fileKey =  apiKey;
-    this.production = !!params['is_production?'];
+    this.production = production;
     this.serverURL = serverURL;
     this.serverInfo = serverInfo;
+    this.icon = iconName;
 
     this.settings = {
       fields: {},
@@ -199,6 +202,12 @@ export default class ParseApp {
       this.classCounts.counts[className] = count;
       this.classCounts.lastFetched[className] = new Date();
     })
+    return p;
+  }
+
+  getRelationCount(relation) {
+    this.setParseKeys();
+    let p = relation.query().count({ useMasterKey: true });
     return p;
   }
 
@@ -372,11 +381,6 @@ export default class ParseApp {
       urlsSeparator = '&';
     }
     return AJAX.abortableGet(audienceId ? `${path}${urlsSeparator}audienceId=${audienceId}` : path);
-  }
-
-  createPushNotification(formData) {
-    let path = '/apps/' + this.slug + '/push_notifications';
-    return AJAX.post(path, formData);
   }
 
   fetchPushNotifications(type, page) {

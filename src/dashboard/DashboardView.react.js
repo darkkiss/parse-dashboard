@@ -64,8 +64,7 @@ export default class DashboardView extends React.Component {
       });
     }
     */
-
-    if (features.logs && features.logs.info && features.logs.error) {
+    if (features.logs && Object.keys(features.logs).some(key => features.logs[key])) {
       coreSubsections.push({
         name: 'Logs',
         link: '/logs'
@@ -96,14 +95,14 @@ export default class DashboardView extends React.Component {
     }
     let pushSubsections = [];
 
-    // The push UI requires immediate and scheduled push (and some ruby endpoints that we will have to remove)
-    /*
-    if (features.push && features.push.immediatePush && features.push.scheduledPush) {
-      pushSubsections({
+    if (features.push && features.push.immediatePush) {
+      pushSubsections.push({
         name: 'Send New Push',
-        link: '/push/activity'
+        link: '/push/new'
       });
     }
+    // The push UI requires immediate and scheduled push (and some ruby endpoints that we will have to remove)
+    /*
 
     if (features.push && features.push.storedPushData) {
       pushSubsections.push({

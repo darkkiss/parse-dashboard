@@ -58,6 +58,7 @@ export default class Browser extends DashboardView {
       newObject: null,
 
       lastError: null,
+      relationCount: 0,
     };
   }
 
@@ -241,6 +242,19 @@ export default class Browser extends DashboardView {
     this.setState({clp: this.props.schema.data.get('CLPs').toJS()});
   }
 
+  refresh() {
+    let initialState = {
+      filters: new List(),
+      data: null,
+      newObject: null,
+      lastMax: -1,
+      selection: {},
+      relation: null
+    };
+    this.setState(initialState);
+    this.fetchData(this.props.params.className, this.state.filters)
+  }
+
   fetchData(source, filters, last) {
     let query = queryFromFilters(source, filters);
     if (this.state.ordering[0] === '-') {
@@ -256,6 +270,11 @@ export default class Browser extends DashboardView {
       }
     }
     query.find({ useMasterKey: true }).then((data) => this.setState({ data: data, lastMax: 200 }));
+  }
+
+  fetchRelationCount(relation) {
+    let p = this.context.currentApp.getRelationCount(relation);
+    p.then((count) => this.setState({ relationCount: count }));
   }
 
   fetchNextPage() {
@@ -327,8 +346,12 @@ export default class Browser extends DashboardView {
   setRelation(relation) {
     this.setState({
       relation: relation,
+      relationCount: 0,
       selection: {},
-    }, () => this.fetchData(relation, this.state.filters));
+    }, () => {
+      this.fetchData(relation, this.state.filters);
+      this.fetchRelationCount(relation);
+    });
   }
 
   handlePointerClick({ className, id }) {
@@ -541,7 +564,7 @@ export default class Browser extends DashboardView {
 
         browser = (
           <DataBrowser
-            count={this.state.counts[className]}
+            count={this.state.relation ? this.state.relationCount : this.state.counts[className]}
             perms={this.state.clp[className]}
             schema={schema}
             userPointers={userPointers}
@@ -552,6 +575,7 @@ export default class Browser extends DashboardView {
             onDropClass={this.showDropClass.bind(this)}
             onExport={this.showExport.bind(this)}
             onChangeCLP={this.onChangeCLP.bind(this)}
+            onRefresh={this.refresh.bind(this)}
 
             columns={columns}
             className={className}
